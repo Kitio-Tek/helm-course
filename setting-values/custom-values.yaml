@@ -2,7 +2,7 @@
 # 2. Set our own wordpress password
 # 3. Increase the replica count to 3
 
-wordpressUsername: Myrian
+wordpressUsername: Tek
 existingSecret: custom-wp-credentials
 service:
   type: NodePort
