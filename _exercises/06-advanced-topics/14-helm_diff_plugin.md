@@ -1,13 +1,16 @@
 # Helm Diff Plugin Guide
 
+> ⚠️ **IMPORTANT: Bitnami Breaking Changes**
+> Bitnami has removed older image tags from Docker Hub. You must use the bitnamilegacy override file when working with NGINX and other Bitnami charts. See [BITNAMI-WORKAROUND.md](../../BITNAMI-WORKAROUND.md) for full details.
+
 Welcome to the Helm Diff Plugin guide! In this session, we'll explore how to use the Helm Diff plugin, a powerful tool that helps visualize changes before you apply updates to your Kubernetes applications. Let's dive into the exciting world of Helm! 🚀
 
 ## Overview
 
-Before we jump into a step-by-step guide, why not give it a shot on your own? Here’s a quick summary of what we’re going to cover:
+Before we jump into a step-by-step guide, why not give it a shot on your own? Here's a quick summary of what we're going to cover:
 
 1. Open your Helm dashboard and ensure the Helm Diff plugin is listed.
-2. Install a specific version of the NGINX chart from the Bitnami repository.
+2. Install the NGINX chart from the Bitnami repository **with the bitnamilegacy override**.
 3. Install the Helm Diff plugin using your terminal.
 4. Use the Helm Diff command to compare changes before upgrading.
 5. Explore the diff output to understand the impact of the changes.
@@ -15,27 +18,166 @@ Before we jump into a step-by-step guide, why not give it a shot on your own? He
 
 Give these steps a try before checking the detailed guide below!
 
+---
+
+## ⚠️ Before vs After: Bitnami Workaround
+
+### ❌ OLD Command (No longer works - Image Pull Error):
+```bash
+helm install nginx-release bitnami/nginx --version 18.0.0
+helm diff upgrade nginx-release bitnami/nginx
+```
+
+### ✅ NEW Command (Working):
+```bash
+helm install nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml
+
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml
+```
+
+---
+
 ## Step-by-Step Guide
 
-Let’s go through the process together to use the Helm Diff plugin effectively:
+Let's go through the process together to use the Helm Diff plugin effectively:
 
-1. **Open Helm Dashboard**: Begin by accessing your Helm dashboard in your browser. Make sure the Helm Diff plugin is visible in the plugins list.
-2. **Install NGINX Chart**: From the Bitnami repository, choose to install the NGINX chart, specifically version 18.0.0. Confirm and let it install.
+### 1. Open Helm Dashboard
+Begin by accessing your Helm dashboard in your browser. Make sure the Helm Diff plugin is visible in the plugins list.
 
-3. **Install Helm Diff Plugin**: Open a terminal window and copy the installation command for the Helm Diff plugin from its GitHub page. Paste it into your terminal and execute it.
+### 2. Install NGINX Chart with bitnamilegacy Override
 
-4. **Check Installed Plugins**: Use the command `helm plugin list` to confirm that both the Helm dashboard and Helm Diff plugins are installed correctly.
+```bash
+helm install nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml
+```
 
-5. **Run Helm Diff Command**: Begin by running `helm diff upgrade <release-name> <chart-name>`. Make sure to replace `<release-name>` with the name of your release (e.g., NGINX) and `<chart-name>` with `bitnami/nginx`.
+Verify the installation:
+```bash
+kubectl get pods -l app.kubernetes.io/instance=nginx-release
+```
 
-6. **Review Changes**: Examine the output to see a colored diff, indicating what changes will occur if you proceed with the upgrade.
+### 3. Install Helm Diff Plugin
+Open a terminal window and install the Helm Diff plugin:
 
-7. **Upgrade NGINX**: If you’re satisfied with the diff, go ahead and perform the upgrade by executing `helm upgrade <release-name> <chart-name>`.
+```bash
+helm plugin install https://github.com/databus23/helm-diff
+```
 
-8. **Explore Revisions**: Use `helm diff revision <release-name> <revision-number>` to review differences between various revisions of your release.
+### 4. Check Installed Plugins
+Confirm that both the Helm dashboard and Helm Diff plugins are installed correctly:
 
-9. **Experiment with Settings**: Feel free to adjust settings, like replica counts, and observe how they impact your deployments. Utilize the `--set` flag for passing in values during a diff.
+```bash
+helm plugin list
+```
+
+### 5. Run Helm Diff Command
+Compare what would change if you upgrade:
+
+```bash
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml
+```
+
+### 6. Review Changes
+Examine the output to see a colored diff, indicating what changes will occur if you proceed with the upgrade.
+
+- **Green (+)**: Lines that will be added
+- **Red (-)**: Lines that will be removed
+- **Yellow (~)**: Lines that will be modified
+
+### 7. Diff with Value Changes
+Test with different values to see how they would impact the deployment:
+
+```bash
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml \
+  --set replicaCount=3
+```
+
+### 8. Upgrade NGINX
+If you're satisfied with the diff, go ahead and perform the upgrade:
+
+```bash
+helm upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml
+```
+
+### 9. Explore Revisions
+Use `helm diff revision` to review differences between various revisions of your release:
+
+```bash
+# Compare revision 1 with revision 2
+helm diff revision nginx-release 1 2
+
+# Compare current release with a specific revision
+helm diff revision nginx-release 1
+```
+
+### 10. Experiment with Settings
+Feel free to adjust settings, like replica counts, and observe how they impact your deployments:
+
+```bash
+# See what would change with 5 replicas
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml \
+  --set replicaCount=5
+```
+
+---
+
+## Useful Helm Diff Options
+
+```bash
+# Show only changed files
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml \
+  --no-hooks
+
+# Output in a specific format
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml \
+  --output simple
+
+# Suppress common information
+helm diff upgrade nginx-release bitnami/nginx \
+  --values setting-values/nginx-bitnami-legacy-override.yaml \
+  --suppress-secrets
+```
+
+---
+
+## Troubleshooting
+
+### If you see `ErrImagePull` or `ImagePullBackOff`:
+
+1. **Uninstall the broken release:**
+   ```bash
+   helm uninstall nginx-release
+   ```
+
+2. **Reinstall with the override file:**
+   ```bash
+   helm install nginx-release bitnami/nginx \
+     --values setting-values/nginx-bitnami-legacy-override.yaml
+   ```
+
+### Plugin not found:
+```bash
+# Reinstall the plugin
+helm plugin uninstall diff
+helm plugin install https://github.com/databus23/helm-diff
+```
+
+---
 
 ## Conclusion
 
-Congratulations on taking the initiative to learn about the Helm Diff plugin! 🌟 Understanding the differences between Helm revisions and upgrades can significantly boost your confidence and efficiency when managing your Kubernetes applications. Keep practicing, and embrace the journey of learning and exploring Helm functionalities!
+Congratulations on taking the initiative to learn about the Helm Diff plugin! 🌟 
+
+Understanding the differences between Helm revisions and upgrades can significantly boost your confidence and efficiency when managing your Kubernetes applications. 
+
+**Key takeaway:** Always include `--values setting-values/nginx-bitnami-legacy-override.yaml` when using `helm diff upgrade` with Bitnami's NGINX chart.
+
+Keep practicing, and embrace the journey of learning and exploring Helm functionalities!

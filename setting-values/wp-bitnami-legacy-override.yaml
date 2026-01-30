@@ -1,0 +1,20 @@
+# WordPress Bitnami Legacy Override
+# Use this file to redirect image pulls to bitnamilegacy repository
+# 
+# Usage:
+#   helm install local-wp bitnami/wordpress --values setting-values/wp-bitnami-legacy-override.yaml
+#   helm upgrade local-wp bitnami/wordpress --values setting-values/wp-bitnami-legacy-override.yaml
+#
+# Note: This is a workaround for Bitnami removing older image tags from Docker Hub.
+# The bitnamilegacy repository may be removed in the future.
+
+# WordPress image override
+image:
+  registry: docker.io
+  repository: bitnamilegacy/wordpress
+
+# MariaDB subchart image override (WordPress depends on MariaDB)
+mariadb:
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/mariadb

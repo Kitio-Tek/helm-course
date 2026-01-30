@@ -1,5 +1,7 @@
 # The Definitive Helm Course: From Beginner to Master
 
+> ⚠️ **IMPORTANT: Bitnami Breaking Changes** - Bitnami has removed older image tags from Docker Hub. If you encounter `ErrImagePull` errors when installing WordPress, NGINX, or PostgreSQL charts, please see [**BITNAMI-WORKAROUND.md**](BITNAMI-WORKAROUND.md) for updated commands and solutions.
+
 This repository contains all the code implemented during my complete Helm course! Check right below for the link with a great discount
 
 ### Course link (with a big discount 🙂): https://www.lauromueller.com/courses/definitive-helm-course

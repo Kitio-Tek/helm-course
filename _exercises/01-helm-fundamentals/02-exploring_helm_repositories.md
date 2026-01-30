@@ -1,5 +1,8 @@
 # Exploring Helm Repositories
 
+> ⚠️ **IMPORTANT: Bitnami Breaking Changes**
+> Bitnami has removed older image tags from Docker Hub. While this exercise (adding repositories) is not affected, exercises that install charts will require additional configuration. See [BITNAMI-WORKAROUND.md](../../BITNAMI-WORKAROUND.md) for details.
+
 In this exercise, we will dive into working with Helm charts and repositories using the Helm CLI. The goal here is to familiarize ourselves with adding and managing repositories, as well as searching for specific charts. Before you check out the step-by-step guide, try to implement the solution yourself based on this flow:
 
 1. Identify and add the Bitnami repository using the Helm CLI `helm repo` commands.

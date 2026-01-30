@@ -1,54 +1,128 @@
-# Upgrading Helm Releases: A Practical Guide
+# Helm Upgrade with Values
+
+> ⚠️ **IMPORTANT: Bitnami Breaking Changes**
+> Bitnami has removed older image tags from Docker Hub. You must include the bitnamilegacy override file when upgrading. See [BITNAMI-WORKAROUND.md](../../BITNAMI-WORKAROUND.md) for full details.
 
 ## Overview
 
-In this exercise, we will focus on upgrading Helm releases effectively. Remember, as our applications evolve, we often need to modify or update our configurations without the hassle of uninstalling and reinstalling Helm releases. Instead, we can make use of the `helm upgrade` command to get the job done smoothly! 🚀
+In this exercise, we'll explore how to upgrade Helm releases with new values. Upgrading is a crucial skill that allows you to modify deployments without completely reinstalling them.
 
-Before diving into the step-by-step guide, here’s a quick summary of the main steps you should try to implement on your own:
+Before diving into the step-by-step guide, try to accomplish the following on your own:
 
-1. Enable auto-scaling in your `values.yaml` configuration.
-2. Set the minimum and maximum replicas for the auto-scaling feature.
-3. Run the `helm upgrade` command with necessary parameters and flags.
-4. Verify the upgrade and check the changes made to your application.
+1. Ensure you have an existing WordPress release installed
+2. Identify the values you want to change
+3. Use `helm upgrade` with the `--reuse-values` flag
+4. Verify the upgrade was successful
 
-Give it a shot and see if you can implement these steps before consulting the guide below!
+---
+
+## ⚠️ Before vs After: Bitnami Workaround
+
+### ❌ OLD Command (No longer works - Image Pull Error):
+```bash
+helm upgrade local-wordpress bitnami/wordpress --reuse-values --values custom-values.yaml --version 23.1.20
+```
+
+### ✅ NEW Command (Working):
+```bash
+helm upgrade local-wordpress bitnami/wordpress \
+  --reuse-values \
+  --values setting-values/wp-bitnami-legacy-override.yaml \
+  --values setting-values/custom-values.yaml
+```
+
+> **Note:** Even with `--reuse-values`, you should still include the bitnamilegacy override file to ensure images are correctly pulled.
+
+---
 
 ## Step-by-Step Guide
 
-1. Make sure that your Kubernetes cluster has the metrics server enabled. If you are using Minikube, run `minikube addons enable metrics-server`.
-
-2. **Modify Your `values.yaml`:**  
-   Open your `custom-values.yaml` file and enable auto-scaling. Additionally, set the minimum replicas to 2 and the maximum replicas to 10.
-
-3. **Run the Upgrade Command:**  
-   In your terminal, execute the following command:
-
+1. **Verify Existing Release**: Check your current release:
    ```bash
-   helm upgrade local-wordpress bitnami/wordpress --reuse-values --values custom-values.yaml --version 23.1.20
+   helm list
+   helm get values local-wordpress
    ```
 
-4. **Observe the Upgrade Process:**  
-   Watch the terminal output to confirm that the upgrade was successful. You should see your pods being terminated and recreated reflecting the new configuration.
+2. **Prepare Your Changes**: Identify what values you want to update in your `custom-values.yaml` file.
 
-5. **Validate Configurations:**  
-   To validate the configurations, run:
+3. **Perform the Upgrade**:
+   ```bash
+   helm upgrade local-wordpress bitnami/wordpress \
+     --reuse-values \
+     --values setting-values/wp-bitnami-legacy-override.yaml \
+     --values setting-values/custom-values.yaml
+   ```
 
+4. **Verify the Upgrade**:
    ```bash
    kubectl get pods
-   ```
-
-   This ensures that the expected number of replicas are running, confirming that auto-scaling is functioning as intended.
-
-6. **Check History and Secrets:**  
-   To see the upgrade history, you can run:
-   ```bash
+   helm get values local-wordpress
    helm history local-wordpress
    ```
-   Also, check for your new secrets with:
+
+---
+
+## Understanding --reuse-values
+
+The `--reuse-values` flag tells Helm to reuse the values from the previous release and merge them with any new values you provide:
+
+```bash
+helm upgrade release-name chart-name \
+  --reuse-values \                            # Keep existing values
+  --values setting-values/wp-bitnami-legacy-override.yaml \  # Image overrides
+  --values setting-values/custom-values.yaml  # Your new customizations
+```
+
+**Important:** Even with `--reuse-values`, the bitnamilegacy override should be included to ensure image references are maintained.
+
+---
+
+## Using --set with Upgrades
+
+You can also use `--set` flags during upgrades:
+
+```bash
+helm upgrade local-wordpress bitnami/wordpress \
+  --reuse-values \
+  --values setting-values/wp-bitnami-legacy-override.yaml \
+  --set replicaCount=3 \
+  --set service.type=LoadBalancer
+```
+
+---
+
+## Troubleshooting
+
+### If you see `ErrImagePull` or `ImagePullBackOff` after upgrade:
+
+1. **Rollback to previous version:**
    ```bash
-   kubectl get secrets
+   helm rollback local-wordpress
    ```
+
+2. **Re-upgrade with the override file:**
+   ```bash
+   helm upgrade local-wordpress bitnami/wordpress \
+     --reuse-values \
+     --values setting-values/wp-bitnami-legacy-override.yaml \
+     --values setting-values/custom-values.yaml
+   ```
+
+### Checking what changed:
+```bash
+# View values from a specific revision
+helm get values local-wordpress --revision 1
+
+# Compare with current values
+helm get values local-wordpress
+```
+
+---
 
 ## Conclusion
 
-In this guide, we tackled how to upgrade Helm releases smoothly using the `helm upgrade` command, without any unnecessary reinstalls. We also learned the significance of managing configurations effectively to get the desired outcomes. Keep practicing these steps and experimenting with different configurations! 🛠️ The more you explore, the more comfortable you'll become with Helm.
+In this lecture, we learned how to upgrade Helm releases with new values. The `--reuse-values` flag is powerful for maintaining configuration while making targeted changes.
+
+**Key takeaway:** Always include the bitnamilegacy override file (`--values setting-values/wp-bitnami-legacy-override.yaml`) when upgrading Bitnami charts, even when using `--reuse-values`.
+
+Keep practicing these upgrade patterns to become more comfortable with managing Helm releases in production environments! 🚀

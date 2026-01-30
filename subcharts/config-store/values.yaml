@@ -123,7 +123,16 @@ tolerations: []
 
 affinity: {}
 
+# ⚠️ BITNAMI WORKAROUND: PostgreSQL image override
+# Bitnami has removed older image tags from Docker Hub.
+# The image section below redirects to bitnamilegacy repository.
+# See BITNAMI-WORKAROUND.md for full details.
+
 postgresql:
+  # bitnamilegacy image override - required for image pull to work
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
   auth:
     username: config_store_user
     database: config_store_db
