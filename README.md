@@ -4,14 +4,6 @@
 
 This repository contains all the code implemented during my complete Helm course! Check right below for the link with a great discount
 
-### Course link (with a big discount 🙂): https://www.lauromueller.com/courses/definitive-helm-course
-
-**Check my other courses:**
-
-- 👉 The Complete Docker and Kubernetes Course: From Zero to Hero - https://www.lauromueller.com/courses/docker-kubernetes
-- 👉 Mastering Terraform: From Beginner to Expert - https://www.lauromueller.com/courses/mastering-terraform
-- 👉 Mastering GitHub Actions: From Beginner to Expert - https://www.lauromueller.com/courses/mastering-github-actions
-- 👉 Write better code: 20 code smells and how to get rid of them - https://www.lauromueller.com/courses/writing-clean-code
 
 Welcome everyone! I'm very happy to see you around, and I hope this repository brings lots of value for those learning more about Helm. Make sure to check the link above for a great discount on the course, where I not only provide theoretical explanations around all the concepts here, but also go in details through the entire coding of the examples in this repository.
 
